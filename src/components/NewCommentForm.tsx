@@ -48,7 +48,6 @@ export const NewCommentForm: React.FC<Props> = ({ postId, onAdd }) => {
       });
 
       onAdd(newComment);
-      // clear only body, keep name/email
       setData(prev => ({ ...prev, body: '' }));
     } catch {
       setErrors(prev => ({
@@ -71,7 +70,6 @@ export const NewCommentForm: React.FC<Props> = ({ postId, onAdd }) => {
       onSubmit={handleSubmit}
       onReset={handleReset}
     >
-      {/* NAME */}
       <div className="field" data-cy="NameField">
         <label className="label" htmlFor="comment-author-name">
           Author Name
@@ -103,8 +101,6 @@ export const NewCommentForm: React.FC<Props> = ({ postId, onAdd }) => {
           </p>
         )}
       </div>
-
-      {/* EMAIL */}
       <div className="field" data-cy="EmailField">
         <label className="label" htmlFor="comment-author-email">
           Author Email
@@ -136,8 +132,6 @@ export const NewCommentForm: React.FC<Props> = ({ postId, onAdd }) => {
           </p>
         )}
       </div>
-
-      {/* BODY */}
       <div className="field" data-cy="BodyField">
         <label className="label" htmlFor="comment-body">
           Comment Text
@@ -158,7 +152,6 @@ export const NewCommentForm: React.FC<Props> = ({ postId, onAdd }) => {
         )}
       </div>
 
-      {/* BUTTONS */}
       <div className="field is-grouped">
         <div className="control">
           <button

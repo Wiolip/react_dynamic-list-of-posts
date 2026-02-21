@@ -28,23 +28,18 @@ export const App: React.FC = () => {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState(false);
 
-  // Load users
   useEffect(() => {
     const loadUsers = async () => {
       try {
         const data = await client.get<User[]>('/users');
 
         setUsers(data);
-      } catch {
-        // opcjonalnie obsłużyć
-      }
+      } catch {}
     };
 
     loadUsers();
   }, []);
 
-  //Load post
-  // Load posts
   useEffect(() => {
     if (!selectedUser) {
       setPosts([]);
@@ -86,7 +81,6 @@ export const App: React.FC = () => {
     };
   }, [selectedUser]);
 
-  // Load comments
   useEffect(() => {
     if (!selectedPost) {
       setComments([]);
