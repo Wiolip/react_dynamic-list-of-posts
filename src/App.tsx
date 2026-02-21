@@ -48,7 +48,8 @@ export const App: React.FC = () => {
     handleDeleteComment,
   } = useComments(selectedPost?.id || null);
 
-  const noPosts = !postsLoading && !postsError && posts.length === 0;
+  const noPosts =
+    !!selectedUser && !postsLoading && !postsError && posts.length === 0;
 
   return (
     <main className="section">
@@ -58,6 +59,7 @@ export const App: React.FC = () => {
             <div className="tile is-child box is-success">
               <div className="block">
                 {usersLoading && <Loader />}
+
                 {usersError && (
                   <div
                     className="notification is-danger"

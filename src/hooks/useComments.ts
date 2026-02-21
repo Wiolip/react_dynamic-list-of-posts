@@ -10,6 +10,8 @@ export function useComments(postId: number | null) {
   useEffect(() => {
     if (!postId) {
       setComments([]);
+      setCommentsLoading(false);
+      setCommentsError(false);
 
       return;
     }
@@ -35,7 +37,7 @@ export function useComments(postId: number | null) {
     let snapshot: Comment[] = [];
 
     setComments(prev => {
-      snapshot = prev;
+      snapshot = [...prev];
 
       return prev.filter(c => c.id !== id);
     });

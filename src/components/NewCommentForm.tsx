@@ -11,12 +11,14 @@ interface Props {
 interface FormState {
   values: CommentData;
   errors: Partial<Record<keyof CommentData, string>>;
+  submissionError: boolean;
 }
 
 export const NewCommentForm: React.FC<Props> = ({ onAdd }) => {
   const [state, setState] = useState<FormState>({
     values: { name: '', email: '', body: '' },
     errors: {},
+    submissionError: false,
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -61,8 +63,10 @@ export const NewCommentForm: React.FC<Props> = ({ onAdd }) => {
         ...prev,
         values: { ...prev.values, body: '' },
         errors: {},
+        submissionError: false,
       }));
     } catch (error) {
+      setState(prev => ({ ...prev, submissionError: true }));
     } finally {
       setIsLoading(false);
     }
@@ -72,6 +76,7 @@ export const NewCommentForm: React.FC<Props> = ({ onAdd }) => {
     setState({
       values: { name: '', email: '', body: '' },
       errors: {},
+      submissionError: false,
     });
   };
 

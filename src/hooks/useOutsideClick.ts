@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 export function useOutsideClick(
   ref: React.RefObject<HTMLElement>,
@@ -11,6 +11,8 @@ export function useOutsideClick(
       }
     };
 
+    // We use direct DOM interaction here because React's event system
+    // does not provide a built-in way to detect clicks outside of a specific element
     document.addEventListener('mousedown', handleClick);
 
     return () => {
