@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Loader } from './Loader';
-import { NewCommentForm } from './NewCommentForm';
 import { Post } from '../types/Post';
 import { Comment } from '../types/Comment';
+import { Loader } from './Loader';
+import { NewCommentForm } from './NewCommentForm';
 
-type Props = {
+interface Props {
   post: Post;
   comments: Comment[];
   commentsLoading: boolean;
   commentsError: boolean;
-  onCommentDelete: (id: number) => void;
-  onCommentAdd: (comment: Comment) => void;
-};
+  onDelete: (id: number) => void;
+  onAdd: (name: string, email: string, body: string) => void;
+}
 
 export const PostDetails: React.FC<Props> = ({
   post,
   comments,
   commentsLoading,
   commentsError,
-  onCommentDelete,
-  onCommentAdd,
+  onDelete,
+  onAdd,
 }) => {
   const [showForm, setShowForm] = useState(false);
 
@@ -27,13 +27,16 @@ export const PostDetails: React.FC<Props> = ({
     setShowForm(false);
   }, [post.id]);
 
+  const handleWriteCommentClick = () => {
+    setShowForm(true);
+  };
+
   return (
     <div className="content" data-cy="PostDetails">
       <div className="block">
         <h2 data-cy="PostTitle">
           #{post.id}: {post.title}
         </h2>
-
         <p data-cy="PostBody">{post.body}</p>
       </div>
 
@@ -66,11 +69,10 @@ export const PostDetails: React.FC<Props> = ({
                 </a>
 
                 <button
-                  data-cy="CommentDelete"
                   type="button"
                   className="delete is-small"
-                  aria-label="delete"
-                  onClick={() => onCommentDelete(comment.id)}
+                  data-cy="CommentDelete"
+                  onClick={() => onDelete(comment.id)}
                 />
               </div>
 
@@ -80,19 +82,19 @@ export const PostDetails: React.FC<Props> = ({
             </article>
           ))}
 
-        {!commentsLoading && !commentsError && !showForm && (
+        {!showForm && !commentsLoading && !commentsError && (
           <button
-            data-cy="WriteCommentButton"
             type="button"
             className="button is-link"
-            onClick={() => setShowForm(true)}
+            data-cy="WriteCommentButton"
+            onClick={handleWriteCommentClick}
           >
             Write a comment
           </button>
         )}
-
-        {showForm && <NewCommentForm postId={post.id} onAdd={onCommentAdd} />}
       </div>
+
+      {showForm && <NewCommentForm postId={post.id} onAdd={onAdd} />}
     </div>
   );
 };

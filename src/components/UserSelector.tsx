@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { User } from '../types/User';
 import classNames from 'classnames';
+import { useOutsideClick } from '../hooks/useOutsideClick';
 
 type Props = {
   users: User[];
@@ -16,31 +17,12 @@ export const UserSelector: React.FC<Props> = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
+  useOutsideClick(dropdownRef, () => setIsOpen(false));
+
   const handleUserClick = (user: User) => {
     onSelected(user);
     setIsOpen(false);
   };
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
 
   return (
     <div

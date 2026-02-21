@@ -1,143 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 
 import 'bulma/css/bulma.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 import './App.scss';
-import { client } from './utils/fetchClient';
 
+import { useUsers } from './hooks/useUsers';
+import { usePosts } from './hooks/usePosts';
+import { useComments } from './hooks/useComments';
+import { UserSelector } from './components/UserSelector';
 import { PostsList } from './components/PostsList';
 import { PostDetails } from './components/PostDetails';
-import { UserSelector } from './components/UserSelector';
 import { Loader } from './components/Loader';
-import { Comment } from './types/Comment';
-import { Post } from './types/Post';
 import { User } from './types/User';
+import { Post } from './types/Post';
 
 export const App: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const { users, usersLoading, usersError } = useUsers();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [postsLoading, setPostsLoading] = useState(false);
-  const [postsError, setPostsError] = useState(false);
-
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [commentsLoading, setCommentsLoading] = useState(false);
-  const [commentsError, setCommentsError] = useState(false);
-
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const data = await client.get<User[]>('/users');
-
-        setUsers(data);
-      } catch {}
-    };
-
-    loadUsers();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedUser) {
-      setPosts([]);
-      setSelectedPost(null);
-
-      return;
-    }
-
-    let isMounted = true;
-
-    const loadPosts = async () => {
-      try {
-        setPostsLoading(true);
-        setPostsError(false);
-        setSelectedPost(null);
-
-        const data = await client.get<Post[]>(
-          `/posts?userId=${selectedUser.id}`,
-        );
-
-        if (isMounted) {
-          setPosts(data);
-        }
-      } catch {
-        if (isMounted) {
-          setPostsError(true);
-        }
-      } finally {
-        if (isMounted) {
-          setPostsLoading(false);
-        }
-      }
-    };
-
-    loadPosts();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedUser]);
-
-  useEffect(() => {
-    if (!selectedPost) {
-      setComments([]);
-
-      return;
-    }
-
-    let isMounted = true;
-
-    const loadComments = async () => {
-      try {
-        setCommentsLoading(true);
-        setCommentsError(false);
-
-        const data = await client.get<Comment[]>(
-          `/comments?postId=${selectedPost.id}`,
-        );
-
-        if (isMounted) {
-          setComments(data);
-        }
-      } catch {
-        if (isMounted) {
-          setCommentsError(true);
-        }
-      } finally {
-        if (isMounted) {
-          setCommentsLoading(false);
-        }
-      }
-    };
-
-    loadComments();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedPost]);
-
-  const handleCommentDelete = async (id: number) => {
-    const previous = [...comments];
-
-    setComments(prev => prev.filter(comment => comment.id !== id));
-
-    try {
-      await client.delete(`/comments/${id}`);
-    } catch {
-      setComments(previous);
-    }
+  const handleUserSelect = (user: User) => {
+    setSelectedUser(user);
+    setSelectedPost(null);
   };
 
-  const handleCommentAdd = (newComment: Comment) => {
-    setComments(prev => [...prev, newComment]);
-  };
+  const { posts, postsLoading, postsError } = usePosts(
+    selectedUser?.id || null,
+  );
 
-  const noPosts =
-    !postsLoading && !postsError && selectedUser && posts.length === 0;
+  const {
+    comments,
+    commentsLoading,
+    commentsError,
+    handleAddComment,
+    handleDeleteComment,
+  } = useComments(selectedPost?.id || null);
+
+  const noPosts = !postsLoading && !postsError && posts.length === 0;
 
   return (
     <main className="section">
@@ -146,10 +46,20 @@ export const App: React.FC = () => {
           <div className="tile is-parent">
             <div className="tile is-child box is-success">
               <div className="block">
+                {usersLoading && <Loader />}
+                {usersError && (
+                  <div
+                    className="notification is-danger"
+                    data-cy="UsersLoadingError"
+                  >
+                    Failed to load users
+                  </div>
+                )}
+
                 <UserSelector
                   users={users}
                   selectedUser={selectedUser}
-                  onSelected={setSelectedUser}
+                  onSelected={handleUserSelect}
                 />
               </div>
 
@@ -203,8 +113,8 @@ export const App: React.FC = () => {
                   comments={comments}
                   commentsLoading={commentsLoading}
                   commentsError={commentsError}
-                  onCommentDelete={handleCommentDelete}
-                  onCommentAdd={handleCommentAdd}
+                  onAdd={handleAddComment}
+                  onDelete={handleDeleteComment}
                 />
               )}
             </div>
