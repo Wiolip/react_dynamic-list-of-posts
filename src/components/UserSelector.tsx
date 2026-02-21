@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { User } from '../types/User';
 import classNames from 'classnames';
 
-interface Props {
+type Props = {
   users: User[];
   selectedUser: User | null;
   onSelected: (user: User) => void;
-}
+};
 
 export const UserSelector: React.FC<Props> = ({
   users,

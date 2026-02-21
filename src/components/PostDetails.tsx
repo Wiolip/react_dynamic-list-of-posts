@@ -4,14 +4,14 @@ import { NewCommentForm } from './NewCommentForm';
 import { Post } from '../types/Post';
 import { Comment } from '../types/Comment';
 
-interface Props {
+type Props = {
   post: Post;
   comments: Comment[];
   commentsLoading: boolean;
   commentsError: boolean;
   onCommentDelete: (id: number) => void;
   onCommentAdd: (comment: Comment) => void;
-}
+};
 
 export const PostDetails: React.FC<Props> = ({
   post,
@@ -25,7 +25,7 @@ export const PostDetails: React.FC<Props> = ({
 
   useEffect(() => {
     setShowForm(false);
-  }, [post]);
+  }, [post.id]);
 
   return (
     <div className="content" data-cy="PostDetails">

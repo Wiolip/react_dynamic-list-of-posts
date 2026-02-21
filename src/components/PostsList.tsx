@@ -2,11 +2,11 @@ import React from 'react';
 import { Post } from '../types/Post';
 import classNames from 'classnames';
 
-interface Props {
+type Props = {
   posts: Post[];
   selectedPost: Post | null;
   onSelect: (post: Post | null) => void;
-}
+};
 
 export const PostsList: React.FC<Props> = ({
   posts,

@@ -3,10 +3,10 @@ import { client } from '../utils/fetchClient';
 import { Comment, CommentData } from '../types/Comment';
 import classNames from 'classnames';
 
-interface Props {
+type Props = {
   postId: number;
   onAdd: (comment: Comment) => void;
-}
+};
 
 export const NewCommentForm: React.FC<Props> = ({ postId, onAdd }) => {
   const [data, setData] = useState<CommentData>({
