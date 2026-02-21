@@ -2,36 +2,44 @@ import { useEffect, useState } from 'react';
 import { client } from '../utils/fetchClient';
 import { Post } from '../types/Post';
 
+interface PostsState {
+  posts: Post[];
+  isLoading: boolean;
+  hasError: boolean;
+}
+
 export function usePosts(userId: number | null) {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [postsLoading, setPostsLoading] = useState(false);
-  const [postsError, setPostsError] = useState(false);
+  const [state, setState] = useState<PostsState>({
+    posts: [],
+    isLoading: false,
+    hasError: false,
+  });
 
   useEffect(() => {
     if (!userId) {
-      setPosts([]);
+      setState({ posts: [], isLoading: false, hasError: false });
 
       return;
     }
 
     const loadPosts = async () => {
-      setPostsLoading(true);
-      setPostsError(false);
+      setState(prev => ({ ...prev, isLoading: true, hasError: false }));
 
       try {
         const data = await client.get<Post[]>(`/posts?userId=${userId}`);
 
-        setPosts(data);
+        setState({ posts: data, isLoading: false, hasError: false });
       } catch {
-        setPosts([]);
-        setPostsError(true);
-      } finally {
-        setPostsLoading(false);
+        setState({ posts: [], isLoading: false, hasError: true });
       }
     };
 
     loadPosts();
   }, [userId]);
 
-  return { posts, postsLoading, postsError };
+  return {
+    posts: state.posts,
+    postsLoading: state.isLoading,
+    postsError: state.hasError,
+  };
 }

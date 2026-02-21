@@ -15,14 +15,25 @@ import { Loader } from './components/Loader';
 import { User } from './types/User';
 import { Post } from './types/Post';
 
+interface SelectionState {
+  user: User | null;
+  post: Post | null;
+}
+
 export const App: React.FC = () => {
   const { users, usersLoading, usersError } = useUsers();
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [{ user: selectedUser, post: selectedPost }, setSelection] =
+    useState<SelectionState>({
+      user: null,
+      post: null,
+    });
 
   const handleUserSelect = (user: User) => {
-    setSelectedUser(user);
-    setSelectedPost(null);
+    setSelection({ user, post: null });
+  };
+
+  const handlePostSelect = (post: Post | null) => {
+    setSelection(prev => ({ ...prev, post }));
   };
 
   const { posts, postsLoading, postsError } = usePosts(
@@ -89,7 +100,7 @@ export const App: React.FC = () => {
                   <PostsList
                     posts={posts}
                     selectedPost={selectedPost}
-                    onSelect={setSelectedPost}
+                    onSelect={handlePostSelect}
                   />
                 )}
               </div>

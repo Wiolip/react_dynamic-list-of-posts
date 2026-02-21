@@ -14,11 +14,9 @@ export const PostsList: React.FC<Props> = ({
   onSelect,
 }) => {
   const handlePostClick = (post: Post) => {
-    if (selectedPost?.id === post.id) {
-      onSelect(null);
-    } else {
-      onSelect(post);
-    }
+    const nextPost = selectedPost?.id === post.id ? null : post;
+
+    onSelect(nextPost);
   };
 
   return (

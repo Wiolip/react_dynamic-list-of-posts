@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Post } from '../types/Post';
 import { Comment } from '../types/Comment';
 import { Loader } from './Loader';
@@ -10,7 +11,7 @@ interface Props {
   commentsLoading: boolean;
   commentsError: boolean;
   onDelete: (id: number) => void;
-  onAdd: (name: string, email: string, body: string) => void;
+  onAdd: (name: string, email: string, body: string) => Promise<void>;
 }
 
 export const PostDetails: React.FC<Props> = ({
@@ -43,7 +44,7 @@ export const PostDetails: React.FC<Props> = ({
       <div className="block">
         {commentsLoading && <Loader />}
 
-        {commentsError && (
+        {!commentsLoading && commentsError && (
           <div className="notification is-danger" data-cy="CommentsError">
             Something went wrong
           </div>
@@ -97,4 +98,28 @@ export const PostDetails: React.FC<Props> = ({
       {showForm && <NewCommentForm postId={post.id} onAdd={onAdd} />}
     </div>
   );
+};
+
+PostDetails.propTypes = {
+  post: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+    userId: PropTypes.number.isRequired,
+  }).isRequired as PropTypes.Validator<Post>,
+
+  comments: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      name: PropTypes.string.isRequired,
+      email: PropTypes.string.isRequired,
+      body: PropTypes.string.isRequired,
+      postId: PropTypes.number.isRequired,
+    }),
+  ).isRequired as PropTypes.Validator<Comment[]>,
+
+  commentsLoading: PropTypes.bool.isRequired,
+  commentsError: PropTypes.bool.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onAdd: PropTypes.func.isRequired,
 };

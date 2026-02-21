@@ -14,28 +14,36 @@ export function useComments(postId: number | null) {
       return;
     }
 
-    setCommentsLoading(true);
-    setCommentsError(false);
+    const loadComments = async () => {
+      setCommentsLoading(true);
+      setCommentsError(false);
+      try {
+        const data = await client.get<Comment[]>(`/comments?postId=${postId}`);
 
-    client
-      .get<Comment[]>(`/comments?postId=${postId}`)
-      .then(setComments)
-      .catch(() => {
-        setComments([]);
+        setComments(data);
+      } catch {
         setCommentsError(true);
-      })
-      .finally(() => setCommentsLoading(false));
+      } finally {
+        setCommentsLoading(false);
+      }
+    };
+
+    loadComments();
   }, [postId]);
 
   const handleDeleteComment = async (id: number) => {
-    const previous = comments;
+    let snapshot: Comment[] = [];
 
-    setComments(prev => prev.filter(c => c.id !== id));
+    setComments(prev => {
+      snapshot = prev;
+
+      return prev.filter(c => c.id !== id);
+    });
 
     try {
       await client.delete(`/comments/${id}`);
     } catch {
-      setComments(previous);
+      setComments(snapshot);
       setCommentsError(true);
     }
   };
@@ -58,8 +66,10 @@ export function useComments(postId: number | null) {
       });
 
       setComments(prev => [...prev, newComment]);
-    } catch {
+    } catch (error) {
       setCommentsError(true);
+
+      throw error;
     }
   };
 

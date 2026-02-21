@@ -1,65 +1,81 @@
 import React, { useState } from 'react';
-import { CommentData } from '../types/Comment';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { CommentData } from '../types/Comment';
 
-type Props = {
+interface Props {
   postId: number;
-  onAdd: (name: string, email: string, body: string) => void;
-};
+  onAdd: (name: string, email: string, body: string) => Promise<void>;
+}
+
+interface FormState {
+  values: CommentData;
+  errors: Partial<Record<keyof CommentData, string>>;
+}
 
 export const NewCommentForm: React.FC<Props> = ({ onAdd }) => {
-  const [data, setData] = useState<CommentData>({
-    name: '',
-    email: '',
-    body: '',
+  const [state, setState] = useState<FormState>({
+    values: { name: '', email: '', body: '' },
+    errors: {},
   });
 
-  const [errors, setErrors] = useState<Partial<CommentData>>({});
-
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (field: keyof CommentData, value: string) => {
-    setData(prev => ({ ...prev, [field]: value }));
-    setErrors(prev => ({ ...prev, [field]: '' }));
+    setState(prev => ({
+      ...prev,
+      values: { ...prev.values, [field]: value },
+      errors: { ...prev.errors, [field]: '' },
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newErrors: Partial<CommentData> = {};
+    const { name, email, body } = state.values;
+    const newErrors: Partial<Record<keyof CommentData, string>> = {};
 
-    if (!data.name.trim()) {
+    if (!name.trim()) {
       newErrors.name = 'Name is required';
     }
 
-    if (!data.email.trim()) {
+    if (!email.trim()) {
       newErrors.email = 'Email is required';
     }
 
-    if (!data.body.trim()) {
+    if (!body.trim()) {
       newErrors.body = 'Comment text is required';
     }
 
-    if (Object.keys(newErrors).length) {
-      setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      setState(prev => ({ ...prev, errors: newErrors }));
 
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
+
     try {
-      // teraz onAdd musi zwrócić Promise
-      await onAdd(data.name.trim(), data.email.trim(), data.body.trim());
-      setData(prev => ({ ...prev, body: '' }));
+      await onAdd(name.trim(), email.trim(), body.trim());
+      setState(prev => ({
+        ...prev,
+        values: { ...prev.values, body: '' },
+        errors: {},
+      }));
+    } catch (error) {
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleReset = () => {
-    setData({ name: '', email: '', body: '' });
-    setErrors({});
+    setState({
+      values: { name: '', email: '', body: '' },
+      errors: {},
+    });
   };
+
+  const { values, errors } = state;
 
   return (
     <form
@@ -80,7 +96,7 @@ export const NewCommentForm: React.FC<Props> = ({ onAdd }) => {
             className={classNames('input', {
               'is-danger': errors.name,
             })}
-            value={data.name}
+            value={values.name}
             onChange={e => handleChange('name', e.target.value)}
           />
 
@@ -118,7 +134,7 @@ export const NewCommentForm: React.FC<Props> = ({ onAdd }) => {
             className={classNames('input', {
               'is-danger': errors.email,
             })}
-            value={data.email}
+            value={values.email}
             onChange={e => handleChange('email', e.target.value)}
           />
 
@@ -155,7 +171,7 @@ export const NewCommentForm: React.FC<Props> = ({ onAdd }) => {
             className={classNames('textarea', {
               'is-danger': errors.body,
             })}
-            value={data.body}
+            value={values.body}
             onChange={e => handleChange('body', e.target.value)}
           />
         </div>
@@ -172,7 +188,7 @@ export const NewCommentForm: React.FC<Props> = ({ onAdd }) => {
           <button
             type="submit"
             className={classNames('button is-link', {
-              'is-loading': loading,
+              'is-loading': isLoading,
             })}
           >
             Add
@@ -187,4 +203,9 @@ export const NewCommentForm: React.FC<Props> = ({ onAdd }) => {
       </div>
     </form>
   );
+};
+
+NewCommentForm.propTypes = {
+  postId: PropTypes.number.isRequired,
+  onAdd: PropTypes.func.isRequired,
 };
